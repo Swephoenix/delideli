@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delegate-M | Manager Dashboard</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+    :root {
+        --blue: #0044FF;
+        --yellow: #FFD500;
+        --white: #FFFFFF;
+        --text: #001144;
+        --light-blue: #E5EDFF;
+        --red: #FF4444;
+        --green: #4CAF50;
+        --orange: #FF9800;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .iphone {
+        width: 375px;
+        height: 812px;
+        background-color: var(--white);
+        border-radius: 40px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2), inset 0 0 0 10px #111;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .notch {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 30px;
+        background-color: #111;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        z-index: 100;
+    }
+
+    .app-header {
+        background-color: var(--blue);
+        color: var(--white);
+        padding: 50px 20px 20px;
+        font-weight: 600;
+        font-size: 18px;
+        text-align: center;
+    }
+
+    .screen-container {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: var(--white);
+    }
+
+    .screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 30px 20px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .screen.active {
+        display: flex;
+        flex-direction: column;
+    }
+
+    h1 {
+        font-size: 28px;
+        color: var(--blue);
+        margin: 0 0 10px 0;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    h2 {
+        font-size: 22px;
+        color: var(--blue);
+        margin: 0 0 10px 0;
+        font-weight: 800;
+    }
+
+    p.subtitle {
+        color: var(--text);
+        margin-bottom: 20px;
+        font-size: 14px;
+        opacity: 0.8;
+    }
+
+    /* Login */
+    .login-logo {
+        width: 80px;
+        height: 80px;
+        background: var(--blue);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px auto 10px;
+        font-size: 36px;
+    }
+
+    .login-title {
+        text-align: center;
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--blue);
+        margin-bottom: 4px;
+    }
+
+    .login-subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: var(--text);
+        opacity: 0.6;
+        margin-bottom: 30px;
+    }
+
+    .input-group {
+        margin-bottom: 16px;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--blue);
+        margin-bottom: 6px;
+    }
+
+    .input-group input,
+    .input-group textarea,
+    .input-group select {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid var(--light-blue);
+        border-radius: 12px;
+        font-size: 16px;
+        font-family: inherit;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    .input-group textarea {
+        resize: none;
+        height: 100px;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus {
+        outline: none;
+        border-color: var(--blue);
+    }
+
+    .login-error {
+        color: var(--red);
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 12px;
+        display: none;
+    }
+
+    /* Cards */
+    .card {
+        background: var(--light-blue);
+        color: var(--blue);
+        padding: 16px;
+        border-radius: 16px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .card:hover { border-color: var(--blue); }
+    .card:active { background-color: var(--blue); color: var(--white); }
+
+    .card h3 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: inherit;
+    }
+
+    .card p {
+        margin: 0;
+        font-size: 13px;
+        opacity: 0.8;
+        font-weight: 400;
+    }
+
+    .status {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 6px;
+        margin-top: 6px;
+    }
+
+    .status-new { background: var(--yellow); color: var(--text); }
+    .status-pending { background: var(--orange); color: var(--white); }
+    .status-assigned { background: var(--light-blue); color: var(--blue); }
+    .status-done { background: var(--green); color: var(--white); }
+    .status-declined { background: var(--red); color: var(--white); }
+
+    .ai-suggestion {
+        background: #FFF9E0;
+        border: 2px solid var(--yellow);
+        padding: 16px;
+        border-radius: 12px;
+        margin: 16px 0;
+    }
+
+    .ai-suggestion strong { color: var(--text); font-size: 14px; }
+    .ai-suggestion p { margin: 8px 0 12px; font-size: 14px; color: var(--text); line-height: 1.4; }
+
+    /* Buttons */
+    .primary-btn {
+        background-color: var(--yellow);
+        color: var(--text);
+        border: none;
+        padding: 16px;
+        width: 100%;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 0px #CCAA00;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .primary-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0px #CCAA00;
+    }
+
+    .secondary-btn {
+        background-color: var(--light-blue);
+        color: var(--blue);
+        border: none;
+        padding: 16px;
+        width: 100%;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .secondary-btn:active {
+        background-color: var(--blue);
+        color: var(--white);
+    }
+
+    .delete-btn {
+        background: var(--red);
+        color: var(--white);
+        border: none;
+        padding: 12px;
+        width: 100%;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+
+    .edit-btn {
+        background: var(--blue);
+        color: var(--white);
+        border: none;
+        padding: 12px;
+        width: 100%;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .resend-btn {
+        background: var(--green);
+        color: var(--white);
+        border: none;
+        padding: 12px;
+        width: 100%;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+
+    .back-btn {
+        background: none;
+        border: none;
+        color: var(--blue);
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+        margin-bottom: 16px;
+        text-align: left;
+    }
+
+    .team-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--light-blue);
+        cursor: pointer;
+    }
+
+    .team-item:hover {
+        background: var(--light-blue);
+        margin: 0 -20px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .team-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--light-blue);
+        flex-shrink: 0;
+    }
+
+    .team-info { flex: 1; }
+    .team-info strong { color: var(--blue); font-size: 15px; display: block; }
+    .team-info span { color: var(--text); font-size: 13px; opacity: 0.7; }
+    .team-info .last-login { font-size: 11px; color: #999; margin-top: 2px; }
+
+    .task-body {
+        background: var(--light-blue);
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+
+    .task-body p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text);
+        line-height: 1.5;
+    }
+
+    .task-body strong { color: var(--blue); }
+
+    .assign-select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid var(--light-blue);
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: inherit;
+        margin-bottom: 12px;
+        background: var(--white);
+    }
+
+    .notes-section {
+        margin-top: 16px;
+    }
+
+    .note-item {
+        background: var(--white);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 8px;
+        border-left: 3px solid var(--blue);
+    }
+
+    .note-item .note-author { font-size: 12px; font-weight: 600; color: var(--blue); }
+    .note-item .note-text { font-size: 14px; color: var(--text); margin-top: 4px; }
+    .note-item .note-time { font-size: 11px; color: #999; margin-top: 4px; }
+
+    .note-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid var(--light-blue);
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: inherit;
+        resize: none;
+        height: 60px;
+        box-sizing: border-box;
+        margin-bottom: 8px;
+    }
+
+    .note-input:focus { outline: none; border-color: var(--blue); }
+
+    /* Edit modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 24px;
+        width: 320px;
+        margin: 20px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal h2 {
+        margin: 0 0 16px;
+        font-size: 18px;
+        color: var(--blue);
+    }
+
+    .modal .input-group { margin-bottom: 12px; }
+    .modal .input-group textarea { height: 80px; }
+
+    .modal-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+    }
+
+    .modal-actions button { flex: 1; }
+
+    /* Login logs */
+    .log-item {
+        padding: 10px 0;
+        border-bottom: 1px solid var(--light-blue);
+        font-size: 13px;
+    }
+
+    .log-item .log-time {
+        font-weight: 600;
+        color: var(--blue);
+    }
+
+    /* Attachments */
+    .attachment-list {
+        margin: 12px 0;
+    }
+
+    .attachment-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--light-blue);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--blue);
+        margin: 4px;
+    }
+
+    .attachment-chip .remove-att {
+        cursor: pointer;
+        font-weight: bold;
+        color: var(--red);
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .file-input-label {
+        display: inline-block;
+        background: var(--light-blue);
+        color: var(--blue);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        color: var(--text);
+        opacity: 0.5;
+        font-size: 14px;
+    }
+
+    .user-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        padding: 10px 14px;
+        background: var(--light-blue);
+        border-radius: 12px;
+    }
+
+    .user-badge img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+    }
+
+    .user-badge span {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--blue);
+    }
+
+    .response-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 6px;
+        margin-top: 4px;
+    }
+
+    .response-pending { background: var(--orange); color: var(--white); }
+    .response-accepted { background: var(--green); color: var(--white); }
+    .response-declined { background: var(--red); color: var(--white); }
+
+    .spacer { flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="iphone">
+    <div class="notch"></div>
+    <div class="app-header" id="appHeader">Delegate-M</div>
+
+    <div class="screen-container">
+
+        <!-- Login Screen -->
+        <div class="screen active" id="loginScreen">
+            <div class="spacer"></div>
+            <div class="login-logo">👤</div>
+            <div class="login-title">Manager Login</div>
+            <p class="login-subtitle">Logga in för att hantera ärenden</p>
+            <div class="login-error" id="loginError">Fel e-post eller lösenord</div>
+            <div class="input-group">
+                <label>E-post</label>
+                <input type="email" id="loginEmail" placeholder="jm@x.se" autocomplete="username">
+            </div>
+            <div class="input-group">
+                <label>Lösenord</label>
+                <input type="password" id="loginPassword" placeholder="jm1" autocomplete="current-password">
+            </div>
+            <button class="primary-btn" onclick="doLogin()">Logga in</button>
+            <div class="spacer"></div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="screen" id="dashboard">
+            <div class="user-badge" id="userBadge"></div>
+            <h1>Inkorg</h1>
+            <p class="subtitle">Välj ett ärende för att se detaljer.</p>
+            <div id="taskList"></div>
+            <div class="spacer"></div>
+            <button class="secondary-btn" onclick="showTeam()" style="margin-bottom:8px;">Visa arbetsfördelning</button>
+            <button class="delete-btn" style="background:var(--red);" onclick="doLogout()">Logga ut</button>
+        </div>
+
+        <!-- Task Detail -->
+        <div class="screen" id="taskDetail">
+            <button class="back-btn" onclick="back()">← Tillbaka</button>
+            <h2 id="taskTitle">—</h2>
+            <div class="task-body" id="taskBody"></div>
+
+            <div id="responseStatus" style="margin-bottom:12px;"></div>
+
+            <div class="ai-suggestion">
+                <strong>💡 AI-förslag</strong>
+                <p id="aiSuggestionText">Hämtar förslag...</p>
+            </div>
+
+            <label style="font-size:14px; font-weight:600; color:var(--blue); margin-bottom:8px; display:block;">Tilldela / Omtilldela:</label>
+            <select class="assign-select" id="assignSelect">
+                <option value="">Välj medarbetare...</option>
+            </select>
+            <button class="primary-btn" onclick="assignOrReassign()">Tilldela uppdrag</button>
+
+            <!-- Edit content -->
+            <div style="margin-top:16px;">
+                <button class="edit-btn" onclick="showEditModal()">✏️ Redigera beskrivning & filer</button>
+            </div>
+
+            <!-- Notes -->
+            <div class="notes-section">
+                <label style="font-size:14px; font-weight:600; color:var(--blue); margin-bottom:8px; display:block;">Anteckningar</label>
+                <div id="notesList"></div>
+                <div style="display:flex;gap:8px;">
+                    <input class="note-input" id="noteInput" placeholder="Skriv en anteckning..." style="flex:1;margin-bottom:0;">
+                    <button class="primary-btn" onclick="addNote()" style="width:auto;padding:12px 20px;margin-bottom:0;">Spara</button>
+                </div>
+            </div>
+
+            <!-- Delete -->
+            <div style="margin-top:16px;">
+                <button class="delete-btn" onclick="deleteTask()">🗑️ Ta bort uppdrag</button>
+            </div>
+        </div>
+
+        <!-- Team Overview -->
+        <div class="screen" id="teamView">
+            <button class="back-btn" onclick="back()">← Tillbaka</button>
+            <h1>Teamstatus</h1>
+            <p class="subtitle">Klicka på en person för att se inloggningslogg.</p>
+            <div id="teamList"></div>
+            <div class="spacer"></div>
+            <button class="secondary-btn" onclick="back()">Tillbaka till inkorgen</button>
+        </div>
+
+        <!-- Worker Login Logs -->
+        <div class="screen" id="workerLogs">
+            <button class="back-btn" onclick="showTeam()">← Tillbaka till team</button>
+            <div id="workerLogHeader"></div>
+            <h2>Inloggningslogg</h2>
+            <div id="loginLogsList"></div>
+            <div class="spacer"></div>
+            <button class="secondary-btn" onclick="showTeam()">Tillbaka</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Edit Content Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <h2>Redigera uppdrag</h2>
+        <div class="input-group">
+            <label>Ämne</label>
+            <input type="text" id="editSubject">
+        </div>
+        <div class="input-group">
+            <label>Beskrivning</label>
+            <textarea id="editMessage"></textarea>
+        </div>
+        <div class="input-group">
+            <label>Bifogade filer</label>
+            <div class="attachment-list" id="attachmentList"></div>
+            <div class="file-input-wrapper">
+                <span class="file-input-label">+ Lägg till fil</span>
+                <input type="file" id="fileInput" onchange="handleFileUpload(event)">
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary-btn" onclick="closeEditModal()">Avbryt</button>
+            <button class="primary-btn" onclick="saveEdit()">Spara & uppdatera</button>
+        </div>
+        <button class="resend-btn" onclick="resendTask()" style="margin-top:12px;">📤 Skicka uppdatering till arbetare</button>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    let currentTask = null;
+    let editAttachments = [];
+    let currentWorkerLogName = null;
+    let refreshInFlight = false;
+
+    function apiFetch(url, options = {}) {
+        return fetch(url, {
+            ...options,
+            headers: {
+                ...(options.headers || {}),
+                'X-App': 'manager',
+            },
+        });
+    }
+
+    (async function checkSession() {
+        try {
+            const res = await apiFetch('/api/me');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.user.role === 'manager') {
+                    currentUser = data.user;
+                    showDashboard();
+                } else {
+                    await apiFetch('/api/logout', { method: 'POST' });
+                }
+            }
+        } catch (e) {}
+    })();
+
+    async function doLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errorEl = document.getElementById('loginError');
+        errorEl.style.display = 'none';
+        if (!email || !password) {
+            errorEl.textContent = 'Fyll i både e-post och lösenord';
+            errorEl.style.display = 'block';
+            return;
+        }
+        try {
+            const res = await apiFetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                errorEl.textContent = data.error || 'Inloggning misslyckades';
+                errorEl.style.display = 'block';
+                return;
+            }
+            if (data.user.role !== 'manager') {
+                errorEl.textContent = 'Endast manager kan logga in här';
+                errorEl.style.display = 'block';
+                await apiFetch('/api/logout', { method: 'POST' });
+                return;
+            }
+            currentUser = data.user;
+            showDashboard();
+        } catch (e) {
+            errorEl.textContent = 'Kunde inte ansluta till servern';
+            errorEl.style.display = 'block';
+        }
+    }
+
+    async function doLogout() {
+        try { await apiFetch('/api/logout', { method: 'POST' }); } catch (e) {}
+        currentUser = null;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('loginScreen').classList.add('active');
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('appHeader').innerText = 'Delegate-M';
+    }
+
+    function showDashboard() {
+        const avatar = currentUser.gender === 'women' ? '/women.png' : '/man.png';
+        document.getElementById('userBadge').innerHTML = `<img src="${avatar}" alt="${currentUser.name}"><span>${currentUser.name}</span>`;
+        document.getElementById('appHeader').innerText = `Hej, ${currentUser.name}`;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('dashboard').classList.add('active');
+        loadWorkers();
+        loadTasks();
+    }
+
+    async function loadWorkers() {
+        try {
+            const res = await apiFetch('/api/workers');
+            if (!res.ok) return;
+            const workers = await res.json();
+            document.getElementById('assignSelect').innerHTML = '<option value="">Välj medarbetare...</option>' +
+                workers.map(w => `<option value="${w.name}">${w.name}</option>`).join('');
+        } catch (e) {}
+    }
+
+    async function loadTasks() {
+        try {
+            const res = await apiFetch('/api/assignments');
+            const tasks = await res.json();
+            const list = document.getElementById('taskList');
+            if (tasks.length === 0) {
+                list.innerHTML = '<div class="empty-state">Inga ärenden ännu.</div>';
+                return;
+            }
+            list.innerHTML = tasks.map(t => {
+                let statusClass = 'status-new', statusLabel = 'Ny', respHtml = '';
+                if (t.status === 'pending') { statusClass = 'status-pending'; statusLabel = 'Väntar på svar'; }
+                else if (t.status === 'assigned') { statusClass = 'status-assigned'; statusLabel = 'Accepterad'; }
+                else if (t.status === 'done') { statusClass = 'status-done'; statusLabel = 'Klar'; }
+                else if (t.status === 'declined') { statusClass = 'status-declined'; statusLabel = 'Avböjd'; }
+                if (t.response_status) {
+                    const rc = t.response_status === 'accepted' ? 'response-accepted' : 'response-declined';
+                    const rl = t.response_status === 'accepted' ? '✅ Accepterad' : '❌ Avböjd';
+                    respHtml = `<br><span class="response-badge ${rc}">${rl}</span>`;
+                }
+                return `
+                    <div class="card" onclick="openTask(${t.id})">
+                        <h3>${t.subject || t.category}</h3>
+                        <p>Från: ${t.name} · ${new Date(t.created_at).toLocaleDateString('sv-SE')}</p>
+                        <span class="status ${statusClass}">${statusLabel}${t.assigned_to ? ' → ' + t.assigned_to : ''}</span>${respHtml}
+                    </div>
+                `;
+            }).join('');
+        } catch (e) { console.error(e); }
+    }
+
+    async function openTask(id) {
+        try {
+            const res = await apiFetch(`/api/assignments/${id}`);
+            if (!res.ok) {
+                if (res.status === 404) {
+                    currentTask = null;
+                    back();
+                    return;
+                }
+                throw new Error('Kunde inte hämta uppdrag');
+            }
+            const task = await res.json();
+            await renderTaskDetail(task, { preserveSelection: false });
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('taskDetail').classList.add('active');
+        } catch (e) { console.error(e); }
+    }
+
+    async function renderTaskDetail(task, { preserveSelection = true } = {}) {
+        currentTask = task;
+
+        document.getElementById('taskTitle').innerText = task.subject || task.category;
+        document.getElementById('taskBody').innerHTML = `
+            <p><strong>Avsändare:</strong> ${task.name}</p>
+            <p><strong>E-post:</strong> ${task.email}</p>
+            ${task.phone ? `<p><strong>Telefon:</strong> ${task.phone}</p>` : ''}
+            <p style="margin-top:8px;">${task.message || 'Ingen beskrivning.'}</p>
+            ${task.attachments && task.attachments.length > 0 ? `<div style="margin-top:8px;">${task.attachments.map(a => `<span class="attachment-chip">📎 ${a.name}</span>`).join('')}</div>` : ''}
+        `;
+
+        const respDiv = document.getElementById('responseStatus');
+        if (task.response_status === 'accepted') {
+            respDiv.innerHTML = '<span class="response-badge response-accepted">✅ Arbetaren har accepterat</span>';
+        } else if (task.response_status === 'declined') {
+            respDiv.innerHTML = `<span class="response-badge response-declined">❌ Arbetaren avböjde${task.declined_reason ? ': "' + task.declined_reason + '"' : ''}</span>`;
+        } else if (task.status === 'pending') {
+            respDiv.innerHTML = '<span class="response-badge response-pending">⏳ Väntar på arbetarens svar</span>';
+        } else {
+            respDiv.innerHTML = '';
+        }
+
+        const assignSelect = document.getElementById('assignSelect');
+        const shouldPreserveSelection = preserveSelection && document.activeElement === assignSelect;
+        if (!shouldPreserveSelection) {
+            assignSelect.value = task.assigned_to || '';
+        }
+
+        document.getElementById('aiSuggestionText').innerText = 'Hämtar förslag...';
+        try {
+            const aiRes = await apiFetch(`/api/assignments/${task.id}/ai-suggestion`);
+            const ai = await aiRes.json();
+            document.getElementById('aiSuggestionText').innerText = ai.suggestion;
+        } catch (e) {
+            document.getElementById('aiSuggestionText').innerText = 'Föreslår: Tilldela en ledig medarbetare.';
+        }
+
+        await loadNotes(task.id);
+    }
+
+    async function loadNotes(taskId) {
+        try {
+            const res = await apiFetch(`/api/assignments/${taskId}/notes`);
+            const notes = await res.json();
+            const list = document.getElementById('notesList');
+            list.innerHTML = notes.length === 0
+                ? '<p style="font-size:13px;opacity:0.5;margin-bottom:12px;">Inga anteckningar ännu.</p>'
+                : notes.map(n => `
+                    <div class="note-item">
+                        <div class="note-author">${n.user_name}</div>
+                        <div class="note-text">${n.content}</div>
+                        <div class="note-time">${new Date(n.created_at).toLocaleString('sv-SE')}</div>
+                    </div>
+                `).join('');
+        } catch (e) {}
+    }
+
+    async function addNote() {
+        const content = document.getElementById('noteInput').value.trim();
+        if (!content || !currentTask) return;
+        try {
+            await apiFetch(`/api/assignments/${currentTask.id}/notes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content }),
+            });
+            document.getElementById('noteInput').value = '';
+            await loadNotes(currentTask.id);
+        } catch (e) { alert('Något gick fel.'); }
+    }
+
+    async function assignOrReassign() {
+        const worker = document.getElementById('assignSelect').value;
+        if (!worker) { alert('Välj en medarbetare först.'); return; }
+        try {
+            await apiFetch(`/api/assignments/${currentTask.id}/assign`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ worker }),
+            });
+            alert(`Uppdrag tilldelat ${worker}!`);
+            openTask(currentTask.id);
+        } catch (e) { alert('Något gick fel.'); }
+    }
+
+    // ── Edit modal ────────────────────────────────────────────────
+    function showEditModal() {
+        if (!currentTask) return;
+        document.getElementById('editSubject').value = currentTask.subject || '';
+        document.getElementById('editMessage').value = currentTask.message || '';
+        editAttachments = currentTask.attachments ? [...currentTask.attachments] : [];
+        renderAttachments();
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+    }
+
+    function renderAttachments() {
+        document.getElementById('attachmentList').innerHTML = editAttachments.map((a, i) =>
+            `<span class="attachment-chip">📎 ${a.name} <span class="remove-att" onclick="removeAttachment(${i})">✕</span></span>`
+        ).join('');
+    }
+
+    function removeAttachment(index) {
+        editAttachments.splice(index, 1);
+        renderAttachments();
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            editAttachments.push({
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                content: reader.result.split(',')[1],
+            });
+            renderAttachments();
+            event.target.value = '';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function saveEdit() {
+        if (!currentTask) return;
+        const subject = document.getElementById('editSubject').value.trim();
+        const message = document.getElementById('editMessage').value.trim();
+        try {
+            await apiFetch(`/api/assignments/${currentTask.id}/edit-content`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subject, message, attachments: editAttachments }),
+            });
+            closeEditModal();
+            openTask(currentTask.id);
+        } catch (e) { alert('Något gick fel.'); }
+    }
+
+    async function resendTask() {
+        if (!currentTask || !currentTask.assigned_to) {
+            alert('Ingen arbetare är tilldelad.');
+            return;
+        }
+        try {
+            // Save edits first, then reassign to trigger new pending state
+            const subject = document.getElementById('editSubject').value.trim();
+            const message = document.getElementById('editMessage').value.trim();
+            await apiFetch(`/api/assignments/${currentTask.id}/edit-content`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subject,
+                    message,
+                    attachments: editAttachments,
+                    assigned_to: currentTask.assigned_to,
+                }),
+            });
+            closeEditModal();
+            alert(`Uppdatering skickad till ${currentTask.assigned_to}!`);
+            openTask(currentTask.id);
+        } catch (e) { alert('Något gick fel.'); }
+    }
+
+    async function deleteTask() {
+        if (!currentTask) return;
+        if (!confirm('Är du säker på att du vill ta bort detta uppdrag?')) return;
+        try {
+            await apiFetch(`/api/assignments/${currentTask.id}`, { method: 'DELETE' });
+            currentTask = null;
+            back();
+        } catch (e) { alert('Något gick fel.'); }
+    }
+
+    // ── Team & Login Logs ─────────────────────────────────────────
+    let workerList = [];
+
+    async function showTeam() {
+        try {
+            const res = await apiFetch('/api/team');
+            const team = await res.json();
+            workerList = team;
+            const list = document.getElementById('teamList');
+            list.innerHTML = team.map(m => {
+                const avatar = m.gender === 'women' ? '/women.png' : '/man.png';
+                const taskNames = m.tasks.length > 0 ? m.tasks.map(t => t.subject || t.category).join(', ') : 'Ledig';
+                const lastLogin = m.last_login ? new Date(m.last_login).toLocaleString('sv-SE') : 'Aldrig inloggad';
+                return `
+                    <div class="team-item" onclick="showWorkerLogs('${m.name}')">
+                        <img class="team-avatar" src="${avatar}" alt="${m.name}">
+                        <div class="team-info">
+                            <strong>${m.name}</strong>
+                            <span>${taskNames}</span>
+                            <div class="last-login">Senast inloggad: ${lastLogin}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('teamView').classList.add('active');
+        } catch (e) { console.error(e); }
+    }
+
+    async function showWorkerLogs(name) {
+        currentWorkerLogName = name;
+        const worker = workerList.find(w => w.name === name);
+        if (!worker) return;
+
+        const avatar = worker.gender === 'women' ? '/women.png' : '/man.png';
+        document.getElementById('workerLogHeader').innerHTML = `
+            <div class="user-badge">
+                <img src="${avatar}" alt="${worker.name}">
+                <span>${worker.name}</span>
+            </div>
+        `;
+
+        try {
+            const res = await apiFetch(`/api/workers/${worker.id}/login-logs`);
+            const data = await res.json();
+            const list = document.getElementById('loginLogsList');
+            if (data.logs.length === 0) {
+                list.innerHTML = '<div class="empty-state">Inga inloggningar registrerade.</div>';
+            } else {
+                list.innerHTML = data.logs.map(l => `
+                    <div class="log-item">
+                        <div class="log-time">${new Date(l.login_at).toLocaleString('sv-SE')}</div>
+                    </div>
+                `).join('');
+            }
+        } catch (e) {
+            document.getElementById('loginLogsList').innerHTML = '<div class="empty-state">Kunde inte hämta loggar.</div>';
+        }
+
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('workerLogs').classList.add('active');
+    }
+
+    function back() {
+        currentWorkerLogName = null;
+        currentTask = null;
+        loadTasks();
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('dashboard').classList.add('active');
+    }
+
+    async function refreshActiveScreen() {
+        if (!currentUser || refreshInFlight) return;
+        const activeScreen = document.querySelector('.screen.active');
+        if (!activeScreen) return;
+
+        refreshInFlight = true;
+        try {
+            if (activeScreen.id === 'dashboard') {
+                await loadTasks();
+            } else if (activeScreen.id === 'taskDetail' && currentTask) {
+                if (document.getElementById('editModal').classList.contains('active')) return;
+                const res = await apiFetch(`/api/assignments/${currentTask.id}`);
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        currentTask = null;
+                        back();
+                    }
+                    return;
+                }
+                const task = await res.json();
+                await renderTaskDetail(task, { preserveSelection: true });
+            } else if (activeScreen.id === 'teamView') {
+                await showTeam();
+            } else if (activeScreen.id === 'workerLogs' && currentWorkerLogName) {
+                await showTeam();
+                await showWorkerLogs(currentWorkerLogName);
+            }
+        } finally {
+            refreshInFlight = false;
+        }
+    }
+
+    document.getElementById('loginPassword').addEventListener('keydown', e => {
+        if (e.key === 'Enter') doLogin();
+    });
+
+    setInterval(refreshActiveScreen, 2000);
+</script>
+
+</body>
+</html>

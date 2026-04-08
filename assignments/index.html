@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beställningsportal</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+    :root {
+        --blue: #0044FF;
+        --yellow: #FFD500;
+        --white: #FFFFFF;
+        --text: #001144;
+        --light-blue: #E5EDFF;
+    }
+    * { box-sizing: border-box; }
+    body {
+        background: var(--light-blue);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+    }
+    .container {
+        text-align: center;
+        max-width: 500px;
+        width: 100%;
+        padding: 20px;
+    }
+    h1 {
+        font-size: 32px;
+        color: var(--blue);
+        margin: 0 0 8px 0;
+        font-weight: 800;
+    }
+    p.subtitle {
+        color: var(--text);
+        opacity: 0.7;
+        margin-bottom: 40px;
+        font-size: 16px;
+    }
+    .link-card {
+        display: block;
+        background: var(--white);
+        border: 2px solid transparent;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 16px;
+        text-decoration: none;
+        color: var(--text);
+        transition: all 0.2s;
+        box-shadow: 0 4px 16px rgba(0, 68, 255, 0.08);
+    }
+    .link-card:hover {
+        border-color: var(--blue);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 68, 255, 0.12);
+    }
+    .link-card:active {
+        transform: translateY(0);
+    }
+    .link-card h2 {
+        margin: 0 0 6px 0;
+        font-size: 20px;
+        color: var(--blue);
+    }
+    .link-card p {
+        margin: 0;
+        font-size: 14px;
+        opacity: 0.7;
+    }
+    .link-card .arrow {
+        float: right;
+        font-size: 20px;
+        color: var(--blue);
+        margin-top: -4px;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1> Beställningsportal</h1>
+    <p class="subtitle">Välj en vy för att komma igång</p>
+
+    <a href="/assignments" class="link-card">
+        <span class="arrow">→</span>
+        <h2>📝 Skapa ärende</h2>
+        <p>Skicka in en ny förfrågan eller beställning</p>
+    </a>
+
+    <a href="/manager" class="link-card">
+        <span class="arrow">→</span>
+        <h2> Manager Dashboard</h2>
+        <p>Granska, tilldela och följ upp ärenden</p>
+    </a>
+
+    <a href="/worker" class="link-card">
+        <span class="arrow">→</span>
+        <h2>🔧 Arbetarpanel</h2>
+        <p>Se dina uppdrag och rapportera framsteg</p>
+    </a>
+</div>
+</body>
+</html>

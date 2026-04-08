@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delegate-W | Arbetarvy</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+    :root {
+        --blue: #0044FF;
+        --yellow: #FFD500;
+        --white: #FFFFFF;
+        --text: #001144;
+        --light-blue: #E5EDFF;
+        --green: #4CAF50;
+        --red: #FF4444;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .iphone {
+        width: 375px;
+        height: 812px;
+        background-color: var(--white);
+        border-radius: 40px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2), inset 0 0 0 10px #111;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .notch {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 30px;
+        background-color: #111;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        z-index: 100;
+    }
+
+    .app-header {
+        background-color: var(--blue);
+        color: var(--white);
+        padding: 50px 20px 20px;
+        font-weight: 600;
+        font-size: 18px;
+        text-align: center;
+    }
+
+    .screen-container {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: var(--white);
+    }
+
+    .screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 30px 20px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .screen.active {
+        display: flex;
+        flex-direction: column;
+    }
+
+    h1 {
+        font-size: 28px;
+        color: var(--blue);
+        margin: 0 0 10px 0;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    p.subtitle {
+        color: var(--text);
+        margin-bottom: 20px;
+        font-size: 14px;
+        opacity: 0.8;
+    }
+
+    /* Login */
+    .login-logo {
+        width: 80px;
+        height: 80px;
+        background: var(--blue);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px auto 10px;
+        font-size: 36px;
+    }
+
+    .login-title {
+        text-align: center;
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--blue);
+        margin-bottom: 4px;
+    }
+
+    .login-subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: var(--text);
+        opacity: 0.6;
+        margin-bottom: 30px;
+    }
+
+    .input-group {
+        margin-bottom: 16px;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--blue);
+        margin-bottom: 6px;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid var(--light-blue);
+        border-radius: 12px;
+        font-size: 16px;
+        font-family: inherit;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+        outline: none;
+        border-color: var(--blue);
+    }
+
+    .login-error {
+        color: var(--red);
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 12px;
+        display: none;
+    }
+
+    /* Tabs */
+    .tabs {
+        display: flex;
+        background: var(--light-blue);
+        padding: 4px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        gap: 4px;
+    }
+
+    .tab {
+        flex: 1;
+        padding: 10px;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--blue);
+        transition: background-color 0.2s;
+    }
+
+    .tab.active {
+        background: var(--blue);
+        color: var(--white);
+    }
+
+    .card {
+        background: var(--light-blue);
+        color: var(--blue);
+        padding: 16px;
+        border-radius: 16px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .card:hover { border-color: var(--blue); }
+    .card:active { background-color: var(--blue); color: var(--white); }
+
+    .card h3 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: inherit;
+    }
+
+    .card p {
+        margin: 0;
+        font-size: 13px;
+        opacity: 0.8;
+        font-weight: 400;
+    }
+
+    .status-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 4px 8px;
+        border-radius: 6px;
+        background: var(--yellow);
+        color: var(--text);
+        margin-top: 6px;
+    }
+
+    .status-pending {
+        background: #FF9800;
+        color: var(--white);
+    }
+
+    .status-declined {
+        background: var(--red);
+        color: var(--white);
+    }
+
+    .status-done {
+        background: var(--green);
+        color: var(--white);
+    }
+
+    /* Buttons */
+    .primary-btn {
+        background-color: var(--yellow);
+        color: var(--text);
+        border: none;
+        padding: 16px;
+        width: 100%;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 0px #CCAA00;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 12px;
+    }
+
+    .primary-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0px #CCAA00;
+    }
+
+    .help-btn {
+        background-color: var(--red);
+        color: var(--white);
+        border: none;
+        padding: 16px;
+        width: 100%;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 0px #CC2222;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 12px;
+    }
+
+    .help-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0px #CC2222;
+    }
+
+    .ai-panel {
+        margin: 0 0 16px;
+        padding: 14px;
+        border: 2px solid var(--light-blue);
+        border-radius: 16px;
+        background: #f8fbff;
+        display: none;
+    }
+
+    .ai-panel h3 {
+        margin: 0 0 8px;
+        font-size: 15px;
+        color: var(--blue);
+    }
+
+    .ai-panel ol {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--text);
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .ai-panel p {
+        margin: 10px 0 0;
+        font-size: 12px;
+        color: var(--text);
+        opacity: 0.7;
+    }
+
+    .done-btn {
+        background-color: var(--green);
+        color: var(--white);
+        border: none;
+        padding: 16px;
+        width: 100%;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 0px #388E3C;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 12px;
+    }
+
+    .done-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0px #388E3C;
+    }
+
+    .accept-btn {
+        background-color: var(--blue);
+        color: var(--white);
+        border: none;
+        padding: 16px;
+        width: 100%;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 0px #0033CC;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 12px;
+    }
+
+    .accept-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0px #0033CC;
+    }
+
+    .decline-btn {
+        background-color: var(--white);
+        color: var(--red);
+        border: 2px solid var(--red);
+        padding: 16px;
+        width: 100%;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 12px;
+    }
+
+    .decline-btn:active {
+        background-color: var(--red);
+        color: var(--white);
+    }
+
+    .back-btn {
+        background: none;
+        border: none;
+        color: var(--blue);
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+        margin-bottom: 16px;
+        text-align: left;
+    }
+
+    textarea {
+        width: 100%;
+        border: 2px solid var(--light-blue);
+        border-radius: 12px;
+        padding: 14px;
+        font-family: inherit;
+        font-size: 14px;
+        resize: none;
+        height: 120px;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: var(--blue);
+    }
+
+    .task-meta {
+        background: var(--light-blue);
+        padding: 14px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+
+    .task-meta p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text);
+        line-height: 1.5;
+    }
+
+    .task-meta strong {
+        color: var(--blue);
+    }
+
+    .user-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        padding: 10px 14px;
+        background: var(--light-blue);
+        border-radius: 12px;
+    }
+
+    .user-badge img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+    }
+
+    .user-badge span {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--blue);
+    }
+
+    .note-item {
+        background: var(--white);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 6px;
+        border-left: 3px solid var(--blue);
+    }
+
+    .note-item .note-author {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--blue);
+    }
+
+    .note-item .note-text {
+        font-size: 13px;
+        color: var(--text);
+        margin-top: 2px;
+    }
+
+    .note-item .note-time {
+        font-size: 11px;
+        color: #999;
+        margin-top: 2px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        color: var(--text);
+        opacity: 0.5;
+        font-size: 14px;
+    }
+
+    .spacer { flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="iphone">
+    <div class="notch"></div>
+    <div class="app-header" id="appHeader">Arbetarpanel</div>
+
+    <div class="screen-container">
+
+        <!-- Login Screen -->
+        <div class="screen active" id="loginScreen">
+            <div class="spacer"></div>
+            <div class="login-logo">🔧</div>
+            <div class="login-title">Arbetar Login</div>
+            <p class="login-subtitle">Logga in för att se dina uppdrag</p>
+
+            <div class="login-error" id="loginError">Fel e-post eller lösenord</div>
+
+            <div class="input-group">
+                <label>E-post</label>
+                <input type="email" id="loginEmail" placeholder="sa@x.se" autocomplete="username">
+            </div>
+            <div class="input-group">
+                <label>Lösenord</label>
+                <input type="password" id="loginPassword" placeholder="sa1" autocomplete="current-password">
+            </div>
+
+            <button class="primary-btn" onclick="doLogin()">Logga in</button>
+            <div class="spacer"></div>
+        </div>
+
+        <!-- Dashboard: Active Tasks -->
+        <div class="screen" id="dashboard">
+            <div class="user-badge" id="userBadge"></div>
+            <h1>Mina Uppdrag</h1>
+            <p class="subtitle">Välj ett uppdrag för att se detaljer.</p>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">Aktiva</div>
+                <div class="tab" data-tab="archive" onclick="switchTab('archive')">Arkiv</div>
+            </div>
+
+            <div id="taskList"></div>
+            <div class="spacer"></div>
+            <button style="background:var(--red);color:white;border:none;width:100%;padding:12px;border-radius:12px;font-weight:600;cursor:pointer;" onclick="doLogout()">Logga ut</button>
+        </div>
+
+        <!-- Archive Screen -->
+        <div class="screen" id="archive">
+            <h1>Arkiv</h1>
+            <p class="subtitle">Slutförda uppdrag.</p>
+
+            <div class="tabs">
+                <div class="tab" data-tab="dashboard" onclick="switchTab('dashboard')">Aktiva</div>
+                <div class="tab active" data-tab="archive" onclick="switchTab('archive')">Arkiv</div>
+            </div>
+
+            <div id="archiveList"></div>
+            <div class="spacer"></div>
+            <button style="background:var(--red);color:white;border:none;width:100%;padding:12px;border-radius:12px;font-weight:600;cursor:pointer;" onclick="doLogout()">Logga ut</button>
+        </div>
+
+        <!-- Task Detail Screen -->
+        <div class="screen" id="detail">
+            <button class="back-btn" onclick="showScreen('dashboard')">← Tillbaka</button>
+            <h1 id="taskTitle">Uppdragstitel</h1>
+
+            <div class="task-meta" id="taskMeta"></div>
+
+            <div class="ai-panel" id="aiPanel">
+                <h3 id="aiTitle">AI-instruktioner</h3>
+                <ol id="aiSteps"></ol>
+                <p id="aiDisclaimer"></p>
+            </div>
+
+            <div id="notesSection" style="margin-bottom:16px;">
+                <label style="font-size:14px; font-weight:600; color:var(--blue); margin-bottom:8px; display:block;">Anteckningar</label>
+                <div id="notesList"></div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <input id="noteInput" placeholder="Skriv en anteckning..." style="flex:1;padding:10px;border:2px solid var(--light-blue);border-radius:10px;font-size:14px;font-family:inherit;resize:none;height:50px;box-sizing:border-box;">
+                    <button class="primary-btn" onclick="addNote()" style="width:auto;padding:10px 16px;margin-bottom:0;align-self:flex-end;">Spara</button>
+                </div>
+            </div>
+
+            <div class="spacer"></div>
+            <div id="actionButtons"></div>
+            <button class="done-btn" id="doneBtn" onclick="markDone()" style="display:none;">Markera som klar</button>
+            <button class="primary-btn" onclick="loadAiInstructions()">Visa AI-steg</button>
+            <button class="help-btn" onclick="alert('Hjälp begärd från kollega!')">Be om hjälp</button>
+        </div>
+
+        <!-- Decline Modal -->
+        <div id="declineModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
+            <div style="background:white;border-radius:20px;padding:24px;width:320px;margin:20px;">
+                <h2 style="margin:0 0 8px;font-size:18px;color:var(--blue);">Avböj uppdrag</h2>
+                <p style="font-size:14px;color:var(--text);opacity:0.7;margin:0 0 16px;">Varför kan du inte ta detta uppdrag?</p>
+                <textarea id="declineReason" placeholder="Ange anledning..." style="width:100%;border:2px solid var(--light-blue);border-radius:10px;padding:12px;font-size:14px;font-family:inherit;resize:none;height:80px;box-sizing:border-box;"></textarea>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button onclick="closeDeclineModal()" style="flex:1;padding:12px;border-radius:12px;border:2px solid var(--light-blue);background:white;color:var(--blue);font-weight:600;cursor:pointer;">Avbryt</button>
+                    <button onclick="confirmDecline()" style="flex:1;padding:12px;border-radius:12px;border:none;background:var(--red);color:white;font-weight:600;cursor:pointer;">Avböj</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    let currentTab = 'dashboard';
+    let currentId = null;
+    let refreshInFlight = false;
+    let aiInstructionsLoadedFor = null;
+    let aiInstructionsState = null;
+
+    function apiFetch(url, options = {}) {
+        return fetch(url, {
+            ...options,
+            headers: {
+                ...(options.headers || {}),
+                'X-App': 'worker',
+            },
+        });
+    }
+
+    // Check for existing session
+    (async function checkSession() {
+        try {
+            const res = await apiFetch('/api/me');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.user.role === 'worker') {
+                    currentUser = data.user;
+                    showDashboard();
+                } else {
+                    // Not a worker, logout
+                    await apiFetch('/api/logout', { method: 'POST' });
+                }
+            }
+        } catch (e) {}
+    })();
+
+    async function doLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errorEl = document.getElementById('loginError');
+        errorEl.style.display = 'none';
+
+        if (!email || !password) {
+            errorEl.textContent = 'Fyll i både e-post och lösenord';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await apiFetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                errorEl.textContent = data.error || 'Inloggning misslyckades';
+                errorEl.style.display = 'block';
+                return;
+            }
+            if (data.user.role !== 'worker') {
+                errorEl.textContent = 'Endast arbetare kan logga in här';
+                errorEl.style.display = 'block';
+                await apiFetch('/api/logout', { method: 'POST' });
+                return;
+            }
+            currentUser = data.user;
+            showDashboard();
+        } catch (e) {
+            errorEl.textContent = 'Kunde inte ansluta till servern';
+            errorEl.style.display = 'block';
+        }
+    }
+
+    async function doLogout() {
+        try {
+            await apiFetch('/api/logout', { method: 'POST' });
+        } catch (e) {}
+        currentUser = null;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('loginScreen').classList.add('active');
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('appHeader').innerText = 'Arbetarpanel';
+    }
+
+    function showDashboard() {
+        const avatar = currentUser.gender === 'women' ? '/women.png' : '/man.png';
+        document.getElementById('userBadge').innerHTML = `
+            <img src="${avatar}" alt="${currentUser.name}">
+            <span>${currentUser.name}</span>
+        `;
+        document.getElementById('appHeader').innerText = `Hej, ${currentUser.name}`;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('dashboard').classList.add('active');
+        loadTasks();
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tab);
+        });
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(tab).classList.add('active');
+        loadTasks();
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if (id === 'dashboard') loadTasks();
+    }
+
+    async function loadTasks() {
+        try {
+            const res = await apiFetch('/api/assignments');
+            const tasks = await res.json();
+
+            const active = tasks.filter(t => t.status !== 'done' && t.status !== 'declined');
+            const done = tasks.filter(t => t.status === 'done' || t.status === 'declined');
+
+            // Active tasks
+            const activeList = document.getElementById('taskList');
+            if (active.length === 0) {
+                activeList.innerHTML = '<div class="empty-state">Inga aktiva uppdrag.</div>';
+            } else {
+                activeList.innerHTML = active.map(t => {
+                    let statusLabel = 'Tilldelad';
+                    let statusClass = '';
+                    if (t.status === 'pending') { statusLabel = 'Väntar på svar'; statusClass = 'status-pending'; }
+                    return `
+                        <div class="card" onclick="openDetail(${t.id})">
+                            <h3>${t.subject || t.category}</h3>
+                            <p>${t.message ? t.message.substring(0, 60) + '...' : 'Ingen beskrivning.'}</p>
+                            <div class="status-badge ${statusClass}">${statusLabel}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Archive
+            const archiveList = document.getElementById('archiveList');
+            if (done.length === 0) {
+                archiveList.innerHTML = '<div class="empty-state">Inga slutförda uppdrag ännu.</div>';
+            } else {
+                archiveList.innerHTML = done.map(t => {
+                    const isDeclined = t.status === 'declined';
+                    return `
+                        <div class="card">
+                            <h3>${t.subject || t.category}</h3>
+                            <p>${isDeclined ? 'Avböjd' : 'Slutförd'}: ${new Date(t.completed_at || t.declined_at || t.created_at).toLocaleDateString('sv-SE')}</p>
+                            <div class="status-badge ${isDeclined ? 'status-declined' : 'status-done'}">${isDeclined ? 'Avböjd' : 'Slutförd'}</div>
+                            ${isDeclined && t.declined_reason ? `<p style="margin-top:6px;font-style:italic;font-size:12px;">"${t.declined_reason}"</p>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function openDetail(id) {
+        try {
+            const res = await apiFetch(`/api/assignments/${id}`);
+            const t = await res.json();
+            currentId = id;
+
+            const sameTaskWithAiState = aiInstructionsLoadedFor === id && aiInstructionsState;
+            if (!sameTaskWithAiState) {
+                aiInstructionsLoadedFor = null;
+                aiInstructionsState = null;
+                document.getElementById('aiPanel').style.display = 'none';
+                document.getElementById('aiTitle').innerText = 'AI-instruktioner';
+                document.getElementById('aiSteps').innerHTML = '';
+                document.getElementById('aiDisclaimer').innerText = '';
+            }
+
+            document.getElementById('taskTitle').innerText = t.subject || t.category;
+            document.getElementById('taskMeta').innerHTML = `
+                <p><strong>Avsändare:</strong> ${t.name} (${t.email})</p>
+                <p style="margin-top:8px;"><strong>Beskrivning:</strong> ${t.message || 'Ingen beskrivning.'}</p>
+                ${t.assigned_to ? `<p style="margin-top:8px;"><strong>Tilldelad:</strong> ${t.assigned_to}</p>` : ''}
+                ${t.response_status === 'accepted' ? '<p style="margin-top:8px;color:var(--green);font-weight:600;">✅ Du har accepterat detta uppdrag</p>' : ''}
+            `;
+
+            // Show/hide action buttons based on status
+            const actionButtons = document.getElementById('actionButtons');
+            const doneBtn = document.getElementById('doneBtn');
+            if (t.status === 'pending') {
+                actionButtons.innerHTML = `
+                    <button class="accept-btn" onclick="acceptTask()">✅ Acceptera uppdrag</button>
+                    <button class="decline-btn" onclick="showDeclineModal()">❌ Avböj uppdrag</button>
+                `;
+                doneBtn.style.display = 'none';
+            } else if (t.status === 'assigned') {
+                actionButtons.innerHTML = '';
+                doneBtn.style.display = 'block';
+            } else {
+                actionButtons.innerHTML = '';
+                doneBtn.style.display = 'none';
+            }
+
+            // Load notes
+            await loadNotes(id);
+
+            if (sameTaskWithAiState) {
+                document.getElementById('aiPanel').style.display = 'block';
+                document.getElementById('aiTitle').innerText = aiInstructionsState.title;
+                document.getElementById('aiSteps').innerHTML = aiInstructionsState.stepsHtml;
+                document.getElementById('aiDisclaimer').innerText = aiInstructionsState.disclaimer;
+            }
+
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('detail').classList.add('active');
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function loadAiInstructions() {
+        if (currentId === null) return;
+
+        const panel = document.getElementById('aiPanel');
+        const title = document.getElementById('aiTitle');
+        const steps = document.getElementById('aiSteps');
+        const disclaimer = document.getElementById('aiDisclaimer');
+
+        panel.style.display = 'block';
+        title.innerText = 'AI-instruktioner';
+        steps.innerHTML = '<li>Hämtar stegvisa instruktioner...</li>';
+        disclaimer.innerText = '';
+
+        try {
+            const res = await apiFetch(`/api/assignments/${currentId}/ai-instructions`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Kunde inte hämta AI-steg.');
+
+            aiInstructionsLoadedFor = currentId;
+            title.innerText = data.title || 'AI-instruktioner';
+            steps.innerHTML = (data.instructions || []).map(step => `<li>${step}</li>`).join('');
+            disclaimer.innerText = data.disclaimer || '';
+            aiInstructionsState = {
+                title: title.innerText,
+                stepsHtml: steps.innerHTML,
+                disclaimer: disclaimer.innerText,
+            };
+        } catch (e) {
+            steps.innerHTML = '<li>Kunde inte hämta AI-steg för detta uppdrag.</li>';
+            disclaimer.innerText = '';
+            aiInstructionsLoadedFor = currentId;
+            aiInstructionsState = {
+                title: title.innerText,
+                stepsHtml: steps.innerHTML,
+                disclaimer: disclaimer.innerText,
+            };
+        }
+    }
+
+    async function loadNotes(taskId) {
+        try {
+            const res = await apiFetch(`/api/assignments/${taskId}/notes`);
+            const notes = await res.json();
+            const list = document.getElementById('notesList');
+            if (notes.length === 0) {
+                list.innerHTML = '<p style="font-size:13px;opacity:0.5;margin-bottom:8px;">Inga anteckningar ännu.</p>';
+            } else {
+                list.innerHTML = notes.map(n => `
+                    <div class="note-item">
+                        <div class="note-author">${n.user_name}</div>
+                        <div class="note-text">${n.content}</div>
+                        <div class="note-time">${new Date(n.created_at).toLocaleString('sv-SE')}</div>
+                    </div>
+                `).join('');
+            }
+        } catch (e) {}
+    }
+
+    async function addNote() {
+        const content = document.getElementById('noteInput').value.trim();
+        if (!content || !currentId) return;
+        try {
+            await apiFetch(`/api/assignments/${currentId}/notes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content }),
+            });
+            document.getElementById('noteInput').value = '';
+            await loadNotes(currentId);
+        } catch (e) {
+            alert('Något gick fel.');
+        }
+    }
+
+    async function acceptTask() {
+        if (currentId === null) return;
+        if (!confirm('Acceptera detta uppdrag?')) return;
+        try {
+            await apiFetch(`/api/assignments/${currentId}/accept`, { method: 'POST' });
+            openDetail(currentId); // Refresh detail view
+        } catch (e) {
+            alert('Något gick fel.');
+        }
+    }
+
+    function showDeclineModal() {
+        document.getElementById('declineReason').value = '';
+        document.getElementById('declineModal').style.display = 'flex';
+    }
+
+    function closeDeclineModal() {
+        document.getElementById('declineModal').style.display = 'none';
+    }
+
+    async function confirmDecline() {
+        if (currentId === null) return;
+        const reason = document.getElementById('declineReason').value.trim();
+        try {
+            await apiFetch(`/api/assignments/${currentId}/decline`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason }),
+            });
+            closeDeclineModal();
+            showScreen('dashboard');
+        } catch (e) {
+            alert('Något gick fel.');
+        }
+    }
+
+    async function markDone() {
+        if (currentId === null) return;
+        if (!confirm('Markera detta uppdrag som slutfört?')) return;
+        try {
+            await apiFetch(`/api/assignments/${currentId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'done' }),
+            });
+            showScreen('dashboard');
+        } catch (e) {
+            alert('Något gick fel.');
+        }
+    }
+
+    // Handle Enter key on login
+    document.getElementById('loginPassword').addEventListener('keydown', e => {
+        if (e.key === 'Enter') doLogin();
+    });
+
+    async function refreshActiveScreen() {
+        if (!currentUser || refreshInFlight) return;
+        const activeScreen = document.querySelector('.screen.active');
+        if (!activeScreen) return;
+
+        refreshInFlight = true;
+        try {
+            if (activeScreen.id === 'dashboard' || activeScreen.id === 'archive') {
+                await loadTasks();
+            } else if (activeScreen.id === 'detail' && currentId !== null) {
+                await openDetail(currentId);
+            }
+        } finally {
+            refreshInFlight = false;
+        }
+    }
+
+    setInterval(refreshActiveScreen, 2000);
+</script>
+
+</body>
+</html>

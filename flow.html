@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beställningsportal — Flödesvy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0 16px;
+            color: #111;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+        }
+
+        .header p {
+            margin: 4px 0 0;
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        .container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 0;
+            padding: 0 40px 40px;
+            overflow-x: auto;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #333;
+            font-size: 13px;
+            padding: 0 20px 28px;
+        }
+
+        .phone-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .phone-shell {
+            position: relative;
+            width: 395px;
+            aspect-ratio: 1405 / 2633;
+            flex-shrink: 0;
+        }
+
+        .phone-screen {
+            position: absolute;
+            top: 3.4%;
+            left: 9%;
+            width: 82%;
+            height: 93.2%;
+            border: none;
+            border-radius: 36px;
+            background: #fff;
+            overflow: hidden;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.18);
+        }
+
+        .phone-mask {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .phone-label {
+            color: #111;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .auto-login-btn {
+            margin-top: 14px;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 999px;
+            background: #0044FF;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 68, 255, 0.18);
+        }
+
+        .auto-login-btn:hover {
+            background: #0037d1;
+        }
+
+        .arrow {
+            font-size: 40px;
+            color: #4CAF50;
+            margin: 0 24px;
+            margin-top: 380px;
+            animation: pulse 2s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(0); opacity: 1; }
+            50% { transform: translateX(12px); opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Deligator - Fast deligation in a smart way</h1>
+        <p>Skapa ärende → Manager godkänner → Arbetare utför</p>
+    </div>
+
+    <div class="container">
+        <div class="phone-wrapper">
+            <div class="phone-label">Användare</div>
+            <div class="phone-shell">
+                <iframe class="phone-screen" id="assignmentsFrame" src="/assignments"></iframe>
+                <img class="phone-mask" src="/phone4k-cut_out.png" alt="">
+            </div>
+        </div>
+
+        <div class="arrow">➔</div>
+
+        <div class="phone-wrapper">
+            <div class="phone-label">Manager (James)</div>
+            <div class="phone-shell">
+                <iframe class="phone-screen" id="managerFrame" src="/manager"></iframe>
+                <img class="phone-mask" src="/phone4k-cut_out.png" alt="">
+            </div>
+            <button class="auto-login-btn" onclick="autoLoginManager()">Auto-login manager</button>
+        </div>
+
+        <div class="arrow">➔</div>
+
+        <div class="phone-wrapper">
+            <div class="phone-label">Arbetare (Sara)</div>
+            <div class="phone-shell">
+                <iframe class="phone-screen" id="workerFrame" src="/worker"></iframe>
+                <img class="phone-mask" src="/phone4k-cut_out.png" alt="">
+            </div>
+            <button class="auto-login-btn" onclick="autoLoginWorker()">Auto-login worker</button>
+        </div>
+    </div>
+
+    <div class="footer-note">A service from Mattias Kihl and Andreas Jansson</div>
+
+    <script>
+        function waitForFrameElements(frame, attempt = 0) {
+            return new Promise((resolve, reject) => {
+                const doc = frame?.contentWindow?.document;
+                const emailInput = doc?.getElementById('loginEmail');
+                const passwordInput = doc?.getElementById('loginPassword');
+
+                if (emailInput && passwordInput) {
+                    resolve({ emailInput, passwordInput });
+                    return;
+                }
+
+                if (attempt >= 20) {
+                    reject(new Error('Loginformuläret hann inte laddas.'));
+                    return;
+                }
+
+                setTimeout(() => {
+                    waitForFrameElements(frame, attempt + 1).then(resolve).catch(reject);
+                }, 150);
+            });
+        }
+
+        async function autoLogin(frameId, email, password) {
+            const frame = document.getElementById(frameId);
+            if (!frame || !frame.contentWindow) return;
+
+            try {
+                const { emailInput, passwordInput } = await waitForFrameElements(frame);
+                emailInput.value = email;
+                passwordInput.value = password;
+
+                if (typeof frame.contentWindow.doLogin === 'function') {
+                    frame.contentWindow.doLogin();
+                }
+            } catch (e) {
+                alert('Auto-login kunde inte köras ännu. Vänta en sekund och försök igen.');
+            }
+        }
+
+        function autoLoginManager() {
+            autoLogin('managerFrame', 'jm@x.se', 'jm1');
+        }
+
+        function autoLoginWorker() {
+            autoLogin('workerFrame', 'sa@x.se', 'sa1');
+        }
+    </script>
+
+</body>
+</html>
