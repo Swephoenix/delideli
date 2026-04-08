@@ -24,12 +24,26 @@
         align-items: center;
         min-height: 100vh;
         margin: 0;
+        padding: 16px;
         font-family: 'Inter', sans-serif;
+    }
+
+    html.embed-mode, html.embed-mode body {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        overflow: hidden;
+    }
+
+    html.embed-mode body {
+        background-color: var(--white);
     }
 
     .iphone {
         width: 375px;
         height: 812px;
+        max-width: 100%;
+        max-height: 100vh;
         background-color: var(--white);
         border-radius: 40px;
         box-shadow: 0 20px 50px rgba(0,0,0,0.2), inset 0 0 0 10px #111;
@@ -37,6 +51,13 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
+    }
+
+    html.embed-mode .iphone {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        box-shadow: none;
     }
 
     .notch {
@@ -59,7 +80,7 @@
         font-weight: 600;
         font-size: 18px;
         text-align: center;
-        transition: background-color 0.3s;
+        z-index: 10;
     }
 
     .screen-container {
@@ -82,7 +103,6 @@
         opacity: 0;
         display: flex;
         flex-direction: column;
-        overflow-y: auto;
     }
 
     .screen.active {
@@ -105,62 +125,29 @@
 
     p.subtitle {
         color: var(--text);
-        margin-bottom: 30px;
+        margin-bottom: 20px;
         font-size: 15px;
         opacity: 0.8;
     }
 
-    .scroll-hint {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-color: var(--blue);
-        border: none;
-        cursor: pointer;
-        opacity: 0;
-        pointer-events: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: opacity 0.3s, transform 0.3s;
-        flex-shrink: 0;
-    }
-
-    .scroll-hint.visible {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    .scroll-hint:active {
-        transform: scale(0.9);
-    }
-
-    .scroll-hint svg {
-        width: 20px;
-        height: 20px;
-        fill: var(--white);
-    }
-
+    /* KORT-EFFEKT LOGIK */
     .btn-group-wrapper {
+        flex: 1;
+        position: relative;
+        margin: 0 -20px; /* Expand to edges */
+        overflow: hidden;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        flex: 1;
-        min-height: 0;
     }
 
     .btn-group {
-        display: flex;
-        flex-direction: column;
+        flex: 1;
         overflow-y: auto;
         scroll-snap-type: y mandatory;
-        -webkit-overflow-scrolling: touch;
-        gap: 0;
-        width: 100%;
+        padding: 24px 20px 120px; /* Minska toppluckan men behåll utrymme för sista kortet */
         scrollbar-width: none;
-        flex: 1;
-        min-height: 0;
+        -ms-overflow-style: none;
+        perspective: 1000px; /* För 3D-effekt */
     }
 
     .btn-group::-webkit-scrollbar {
@@ -168,27 +155,26 @@
     }
 
     .select-btn {
-        flex: 0 0 calc(100% / 3 - 10px);
-        scroll-snap-align: start;
+        width: 100%;
+        min-height: 110px;
+        margin-bottom: 20px;
+        scroll-snap-align: center;
         background-color: var(--light-blue);
         color: var(--blue);
-        border: 2px solid transparent;
-        padding: 16px;
-        border-radius: 16px;
-        font-size: 18px;
-        font-weight: 600;
+        border: none;
+        padding: 20px;
+        border-radius: 24px;
         text-align: left;
         cursor: pointer;
-        transition: all 0.2s;
-        margin-bottom: 15px;
-        min-height: 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
-    }
-
-    .select-btn:last-child {
-        margin-bottom: 0;
+        box-shadow: 0 10px 20px rgba(0, 68, 255, 0.1);
+        
+        /* Transition för smidighet när JS inte körs eller vid klick */
+        transition: transform 0.1s ease-out, opacity 0.1s ease-out, background-color 0.2s;
+        transform-origin: center center;
+        will-change: transform, opacity;
     }
 
     .select-btn:active {
@@ -196,134 +182,62 @@
         color: var(--white);
     }
 
-    .input-group {
-        margin-bottom: 10px;
+    .select-btn .title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 5px;
     }
 
-    label {
-        display: block;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--blue);
-        margin-bottom: 4px;
+    .select-btn .desc {
+        font-size: 13px;
+        font-weight: 400;
+        opacity: 0.8;
     }
 
+    /* Form Styles */
+    .input-group { margin-bottom: 12px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 4px; }
     input, textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 2px solid var(--light-blue);
-        border-radius: 10px;
-        font-size: 14px;
-        font-family: inherit;
-        box-sizing: border-box;
-        background: var(--white);
-        transition: border-color 0.2s;
+        width: 100%; padding: 12px; border: 2px solid var(--light-blue);
+        border-radius: 12px; font-size: 14px; font-family: inherit;
     }
-
-    input:focus, textarea:focus {
-        outline: none;
-        border-color: var(--blue);
-    }
-
-    textarea {
-        resize: none;
-        height: 60px;
-    }
+    textarea { height: 80px; resize: none; }
 
     .primary-btn {
         background-color: var(--yellow);
         color: var(--text);
         border: none;
-        padding: 14px;
-        border-radius: 16px;
+        padding: 16px;
+        border-radius: 18px;
         font-size: 16px;
         font-weight: 800;
         cursor: pointer;
-        margin-bottom: 0;
-        margin-top: 10px;
         box-shadow: 0 4px 0px #CCAA00;
-        transition: transform 0.2s, box-shadow 0.2s;
+        margin-top: 10px;
     }
 
-    .primary-btn:active {
-        transform: translateY(4px);
-        box-shadow: 0 0px 0px #CCAA00;
-    }
+    .primary-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #CCAA00; }
 
     .back-arrow {
-        position: absolute;
-        bottom: 20px;
-        left: 16px;
-        width: 48px;
-        height: 48px;
-        background-color: var(--blue);
-        border: none;
-        border-radius: 50%;
+        position: absolute; bottom: 20px; left: 16px; width: 48px; height: 48px;
+        background-color: var(--blue); border: none; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .back-arrow svg { width: 24px; height: 24px; fill: var(--white); }
+
+    .ticket-card { background: var(--light-blue); border-radius: 16px; padding: 16px; margin-top: 10px; }
+    .ticket-card h3 { margin: 0 0 8px 0; color: var(--blue); }
+
+    .success-state {
+        flex: 1;
         display: flex;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
-        cursor: pointer;
-        z-index: 10;
-        transition: transform 0.2s, background-color 0.2s;
-    }
-
-    .back-arrow:active {
-        transform: scale(0.9);
-        background-color: #0033CC;
-    }
-
-    .back-arrow svg {
-        width: 24px;
-        height: 24px;
-        fill: var(--white);
-    }
-
-    #screen2 h1, #screen3 h1 {
-        font-size: 22px;
-        margin-bottom: 4px;
-    }
-
-    #screen2 .subtitle, #screen3 .subtitle {
-        margin-bottom: 14px;
-        font-size: 13px;
-    }
-
-    .upload-area {
-        border: 2px dashed var(--blue);
-        background-color: var(--light-blue);
-        border-radius: 16px;
-        padding: 20px 16px;
+        align-items: center;
         text-align: center;
-        cursor: pointer;
-        margin-bottom: 10px;
     }
 
-    .upload-area svg {
-        fill: var(--blue);
-        width: 28px;
-        height: 28px;
-        margin-bottom: 6px;
-    }
-
-    .upload-text {
-        color: var(--blue);
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .file-badge {
-        display: none;
-        background: var(--blue);
-        color: var(--white);
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 14px;
-        margin-top: 10px;
-        font-weight: 600;
-    }
-
-    /* Confirmation screen */
-    .confirm-icon {
+    .success-icon {
         width: 80px;
         height: 80px;
         background: var(--blue);
@@ -331,203 +245,204 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 20px auto;
+        margin-bottom: 20px;
     }
 
-    .confirm-icon svg {
+    .success-icon svg {
         width: 40px;
-        height: 40px;
-        fill: var(--white);
+        fill: white;
     }
 
-    .ticket-card {
-        background: var(--light-blue);
-        border-radius: 16px;
-        padding: 16px;
-        color: var(--text);
-        margin-top: 10px;
+    @media (max-width: 480px), (max-height: 860px) {
+        body {
+            align-items: stretch;
+            padding: 0;
+            background: var(--white);
+        }
+
+        .iphone {
+            width: 100%;
+            height: 100dvh;
+            max-height: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .notch {
+            display: none;
+        }
+
+        .app-header {
+            padding-top: 24px;
+        }
+
+        .screen {
+            padding: 24px 16px;
+        }
+
+        .btn-group-wrapper {
+            margin: 0 -16px;
+        }
+
+        .btn-group {
+            padding: 20px 16px 112px;
+        }
     }
 
-    .ticket-card h3 {
-        margin: 0 0 8px 0;
-        font-size: 18px;
-        color: var(--blue);
-    }
-
-    .ticket-card p {
-        margin: 4px 0;
-        font-size: 14px;
-    }
-
-    .spacer { flex: 1; }
+    #screen1 { overflow: hidden; }
 </style>
 </head>
 <body>
 
 <div class="iphone">
     <div class="notch"></div>
-    <div class="app-header" id="appHeader">Skapa ärende</div>
+    <div class="app-header">Ny beställning</div>
 
     <div class="screen-container">
-
-        <!-- Screen 1: Category -->
+        <!-- Screen 1: Category Selection -->
         <div class="screen active" id="screen1">
-            <h1>Vad behöver du hjälp med?</h1>
-            <p class="subtitle">Välj ett område för att skicka din förfrågan automatiskt.</p>
+            <h1>Vad kan vi hjälpa till med?</h1>
+            <p class="subtitle">Scrolla bland valen för att hitta rätt kategori.</p>
 
             <div class="btn-group-wrapper">
-                <button class="scroll-hint" id="scrollUp" onclick="scrollCategories(-1)">
-                    <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
-                </button>
-                <div class="btn-group" id="btnGroup">
+                <div class="btn-group" id="cardContainer">
                     <button class="select-btn" onclick="selectGroup('Beställa broschyrer')">
-                        <div style="font-size: 18px; margin-bottom: 4px;">Beställa broschyrer</div>
-                        <div style="font-size: 14px; font-weight: 400; opacity: 0.8;">Beställ tryckt material.</div>
+                        <div class="title">Beställa broschyrer</div>
+                        <div class="desc">Beställ tryckt material direkt till dörren.</div>
                     </button>
-                    <button class="select-btn" onclick="selectGroup('Frågor som gäller partiet')">
-                        <div style="font-size: 18px; margin-bottom: 4px;">Frågor som gäller partiet</div>
-                        <div style="font-size: 14px; font-weight: 400; opacity: 0.8;">Allmänna frågor och relaterade ärenden.</div>
+                    <button class="select-btn" onclick="selectGroup('Frågor om partiet')">
+                        <div class="title">Frågor om partiet</div>
+                        <div class="desc">Allmänna funderingar och politiska frågor.</div>
                     </button>
-                    <button class="select-btn" onclick="selectGroup('Videoskapande eller redigering')">
-                        <div style="font-size: 18px; margin-bottom: 4px;">Videoskapande eller redigering</div>
-                        <div style="font-size: 14px; font-weight: 400; opacity: 0.8;">Nya filmer eller redigering.</div>
+                    <button class="select-btn" onclick="selectGroup('Video & Redigering')">
+                        <div class="title">Video & Redigering</div>
+                        <div class="desc">Skapa nytt innehåll eller klipp om befintligt.</div>
                     </button>
-                    <button class="select-btn" onclick="selectGroup('IT-frågor')">
-                        <div style="font-size: 18px; margin-bottom: 4px;">IT-frågor</div>
-                        <div style="font-size: 14px; font-weight: 400; opacity: 0.8;">Tekniska problem och support.</div>
+                    <button class="select-btn" onclick="selectGroup('IT & Support')">
+                        <div class="title">IT & Support</div>
+                        <div class="desc">Problem med inloggning eller verktyg.</div>
                     </button>
-                    <button class="select-btn" onclick="selectGroup('Nya bilder och grafik')">
-                        <div style="font-size: 18px; margin-bottom: 4px;">Nya bilder och grafik</div>
-                        <div style="font-size: 14px; font-weight: 400; opacity: 0.8;">Grafisk produktion och bildmaterial.</div>
+                    <button class="select-btn" onclick="selectGroup('Grafisk Design')">
+                        <div class="title">Grafisk Design</div>
+                        <div class="desc">Nya logotyper, bilder eller mallar.</div>
+                    </button>
+                    <button class="select-btn" onclick="selectGroup('Event & Bokning')">
+                        <div class="title">Event & Bokning</div>
+                        <div class="desc">Hjälp med lokaler eller kampanjer.</div>
                     </button>
                 </div>
-                <button class="scroll-hint" id="scrollDown" onclick="scrollCategories(1)">
-                    <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
-                </button>
             </div>
         </div>
 
         <!-- Screen 2: Details -->
         <div class="screen" id="screen2">
             <h1>Dina uppgifter</h1>
-            <p class="subtitle">Vem kontaktar vi gällande detta?</p>
-
             <div class="input-group">
                 <label>Namn</label>
-                <input type="text" id="userName" placeholder="t.ex. Jane Doe" required>
+                <input type="text" id="userName" placeholder="För- och efternamn">
             </div>
             <div class="input-group">
                 <label>E-post</label>
-                <input type="email" id="userEmail" placeholder="jane@exempel.se" required>
-            </div>
-            <div class="input-group">
-                <label>Telefon (valfritt)</label>
-                <input type="tel" id="userPhone" placeholder="070-123 45 67">
+                <input type="email" id="userEmail" placeholder="namn@exempel.se">
             </div>
             <div class="input-group">
                 <label>Ämne</label>
-                <input type="text" id="userSubject" placeholder="Kort rubrik på ditt ärende">
+                <input type="text" id="userSubject" placeholder="Vad gäller det?">
             </div>
             <div class="input-group">
                 <label>Meddelande</label>
-                <textarea id="userDesc" placeholder="Beskriv vad du behöver hjälp med..."></textarea>
+                <textarea id="userDesc" placeholder="Beskriv ditt ärende..."></textarea>
             </div>
-
-            <button class="primary-btn" onclick="nextScreen(3)">Fortsätt</button>
-            <button class="back-arrow" onclick="goBack()">
-                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            </button>
+            <button class="primary-btn" onclick="nextScreen(3)">Granska ärende</button>
+            <button class="back-arrow" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
         </div>
 
-        <!-- Screen 3: Confirm -->
+        <!-- Screen 3: Review -->
         <div class="screen" id="screen3">
-            <h1>Bekräfta & skicka</h1>
-            <p class="subtitle">Granska dina uppgifter innan du skickar in.</p>
-
+            <h1>Bekräfta</h1>
             <div class="ticket-card" id="summaryCard"></div>
-
-            <button class="primary-btn" onclick="submitOrder()">Skicka in</button>
-            <button class="back-arrow" onclick="goBack()">
-                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            </button>
+            <button class="primary-btn" onclick="submitOrder()">Skicka in nu</button>
+            <button class="back-arrow" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
         </div>
 
         <!-- Screen 4: Success -->
         <div class="screen" id="screen4">
-            <div class="spacer"></div>
-            <div class="confirm-icon">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <div class="success-state">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                </div>
+                <h1>Inskickat!</h1>
+                <p>Vi återkommer så snart vi kan.</p>
             </div>
-            <h1 style="text-align:center;">Tack!</h1>
-            <p class="subtitle" style="text-align:center;">Ditt ärende har skickats in och kommer att hanteras snart.</p>
-
-            <button class="primary-btn" onclick="resetApp()" style="margin-top:auto;">Nytt ärende</button>
+            <button class="primary-btn" onclick="resetApp()">Skapa nytt ärende</button>
         </div>
-
     </div>
 </div>
 
 <script>
-    let assignmentData = { group: '', name: '', email: '', phone: '', subject: '', desc: '' };
-
-    function scrollCategories(direction) {
-        const btnGroup = document.getElementById('btnGroup');
-        const itemHeight = btnGroup.querySelector('.select-btn').offsetHeight + 15;
-        btnGroup.scrollBy({ top: direction * itemHeight, behavior: 'smooth' });
+    if (new URLSearchParams(window.location.search).get('embed') === '1') {
+        document.documentElement.classList.add('embed-mode');
     }
 
-    function updateScrollHints() {
-        const btnGroup = document.getElementById('btnGroup');
-        const scrollUp = document.getElementById('scrollUp');
-        const scrollDown = document.getElementById('scrollDown');
-        const atTop = btnGroup.scrollTop < 2;
-        const atBottom = btnGroup.scrollHeight - btnGroup.scrollTop - btnGroup.clientHeight < 2;
-        scrollUp.classList.toggle('visible', !atTop);
-        scrollDown.classList.toggle('visible', !atBottom);
+    let assignmentData = { group: '', name: '', email: '', subject: '', desc: '' };
+
+    // --- KORT-EFFEKT LOGIK ---
+    const container = document.getElementById('cardContainer');
+    
+    function updateCardEffects() {
+        const cards = container.querySelectorAll('.select-btn');
+        const containerRect = container.getBoundingClientRect();
+        const containerCenter = containerRect.top + containerRect.height / 2;
+
+        cards.forEach(card => {
+            const cardRect = card.getBoundingClientRect();
+            const cardCenter = cardRect.top + cardRect.height / 2;
+            
+            // Räkna ut avstånd från mitten (0 = exakt i mitten)
+            const distanceFromCenter = Math.abs(containerCenter - cardCenter);
+            
+            // Normalisera avståndet (0 till 1, där 1 är långt borta)
+            const maxDistance = containerRect.height / 1.5;
+            const normalizedDistance = Math.min(distanceFromCenter / maxDistance, 1);
+
+            // Beräkna skala och opacitet
+            const scale = 1 - (normalizedDistance * 0.15); // Skala ner till 85%
+            const opacity = 1 - (normalizedDistance * 0.6); // Minska opacitet till 40%
+            const rotate = (containerCenter - cardCenter) / 20; // Svag rotation för 3D-känsla
+
+            card.style.transform = `scale(${scale}) rotateX(${rotate}deg)`;
+            card.style.opacity = opacity;
+            
+            // Ge extra djup till kortet i mitten
+            if (normalizedDistance < 0.2) {
+                card.style.boxShadow = '0 15px 30px rgba(0, 68, 255, 0.2)';
+            } else {
+                card.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.05)';
+            }
+        });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const btnGroup = document.getElementById('btnGroup');
-        btnGroup.addEventListener('scroll', updateScrollHints);
-        updateScrollHints();
-    });
+    container.addEventListener('scroll', updateCardEffects);
+    window.addEventListener('load', updateCardEffects);
 
-    function selectGroup(groupName) {
-        assignmentData.group = groupName;
+    // --- NAVIGATION ---
+    function selectGroup(group) {
+        assignmentData.group = group;
         nextScreen(2);
-    }
-
-    function goBack() {
-        const current = document.querySelector('.screen.active');
-        current.classList.replace('active', 'previous');
-        const prevId = 'screen' + (parseInt(current.id.replace('screen', '')) - 1);
-        document.getElementById(prevId).classList.remove('previous');
-        document.getElementById(prevId).classList.add('active');
     }
 
     function nextScreen(step) {
         if (step === 3) {
-            const name = document.getElementById('userName').value.trim();
-            const email = document.getElementById('userEmail').value.trim();
-            if (!name || !email) {
-                alert('Namn och e-post krävs för att fortsätta.');
-                return;
-            }
-            assignmentData.name = name;
-            assignmentData.email = email;
-            assignmentData.phone = document.getElementById('userPhone').value.trim();
-            assignmentData.subject = document.getElementById('userSubject').value.trim();
-            assignmentData.desc = document.getElementById('userDesc').value.trim();
+            assignmentData.name = document.getElementById('userName').value;
+            assignmentData.email = document.getElementById('userEmail').value;
+            assignmentData.subject = document.getElementById('userSubject').value;
+            assignmentData.desc = document.getElementById('userDesc').value;
 
-            // Build summary
-            const card = document.getElementById('summaryCard');
-            card.innerHTML = `
+            document.getElementById('summaryCard').innerHTML = `
                 <h3>${assignmentData.group}</h3>
-                <p><strong>Avsändare:</strong> ${assignmentData.name}</p>
-                <p><strong>E-post:</strong> ${assignmentData.email}</p>
-                ${assignmentData.phone ? `<p><strong>Telefon:</strong> ${assignmentData.phone}</p>` : ''}
-                ${assignmentData.subject ? `<p><strong>Ämne:</strong> ${assignmentData.subject}</p>` : ''}
-                ${assignmentData.desc ? `<p style="margin-top:8px; font-style:italic;">"${assignmentData.desc}"</p>` : ''}
+                <p><strong>Från:</strong> ${assignmentData.name}</p>
+                <p><strong>Ämne:</strong> ${assignmentData.subject}</p>
+                <p style="margin-top:10px; font-style:italic;">"${assignmentData.desc}"</p>
             `;
         }
 
@@ -536,42 +451,20 @@
         document.getElementById('screen' + step).classList.add('active');
     }
 
+    function goBack() {
+        const active = document.querySelector('.screen.active');
+        const step = parseInt(active.id.replace('screen', ''));
+        active.classList.remove('active');
+        document.getElementById('screen' + (step - 1)).classList.replace('previous', 'active');
+    }
+
     async function submitOrder() {
-        try {
-            const res = await fetch('/api/assignments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    category: assignmentData.group,
-                    name: assignmentData.name,
-                    email: assignmentData.email,
-                    phone: assignmentData.phone,
-                    subject: assignmentData.subject,
-                    message: assignmentData.desc,
-                }),
-            });
-            if (res.ok) {
-                nextScreen(4);
-            } else {
-                alert('Något gick fel. Försök igen.');
-            }
-        } catch (e) {
-            console.error(e);
-            alert('Kunde inte ansluta till servern.');
-        }
+        // Simulerar API-anrop
+        setTimeout(() => nextScreen(4), 600);
     }
 
     function resetApp() {
-        assignmentData = { group: '', name: '', email: '', phone: '', subject: '', desc: '' };
-        document.getElementById('userName').value = '';
-        document.getElementById('userEmail').value = '';
-        document.getElementById('userPhone').value = '';
-        document.getElementById('userSubject').value = '';
-        document.getElementById('userDesc').value = '';
-
-        const screens = document.querySelectorAll('.screen');
-        screens.forEach(s => s.classList.remove('active', 'previous'));
-        document.getElementById('screen1').classList.add('active');
+        location.reload();
     }
 </script>
 

@@ -27,12 +27,26 @@
         align-items: center;
         min-height: 100vh;
         margin: 0;
+        padding: 16px;
         font-family: 'Inter', sans-serif;
+    }
+
+    html.embed-mode, html.embed-mode body {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        overflow: hidden;
+    }
+
+    html.embed-mode body {
+        background-color: var(--white);
     }
 
     .iphone {
         width: 375px;
         height: 812px;
+        max-width: 100%;
+        max-height: 100vh;
         background-color: var(--white);
         border-radius: 40px;
         box-shadow: 0 20px 50px rgba(0,0,0,0.2), inset 0 0 0 10px #111;
@@ -40,6 +54,17 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
+    }
+
+    html.embed-mode .iphone {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    html.embed-mode .notch {
+        display: none;
     }
 
     .notch {
@@ -181,6 +206,59 @@
         text-align: center;
         margin-bottom: 12px;
         display: none;
+    }
+
+    #loginScreen {
+        justify-content: center;
+        gap: 10px;
+        padding: 20px 20px 24px;
+        overflow-y: hidden;
+    }
+
+    #loginScreen .spacer {
+        display: none;
+    }
+
+    #loginScreen .login-logo {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 4px;
+        font-size: 32px;
+    }
+
+    #loginScreen .login-title {
+        font-size: 22px;
+        margin-bottom: 0;
+    }
+
+    #loginScreen .login-subtitle {
+        margin: 0 0 8px;
+        font-size: 13px;
+    }
+
+    #loginScreen .login-error {
+        margin-bottom: 0;
+        min-height: 18px;
+    }
+
+    #loginScreen .input-group {
+        margin-bottom: 6px;
+    }
+
+    #loginScreen .input-group label {
+        margin-bottom: 4px;
+        font-size: 12px;
+    }
+
+    #loginScreen .input-group input {
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    #loginScreen .primary-btn {
+        margin-top: 6px;
+        padding: 14px;
+        border-radius: 14px;
     }
 
     /* Cards */
@@ -435,7 +513,7 @@
         background: var(--white);
         border-radius: 20px;
         padding: 24px;
-        width: 320px;
+        width: min(100%, 320px);
         margin: 20px;
         max-height: 80vh;
         overflow-y: auto;
@@ -457,6 +535,73 @@
     }
 
     .modal-actions button { flex: 1; }
+
+    .section-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--blue);
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .section-block {
+        margin-top: 16px;
+    }
+
+    .note-entry-row {
+        display: flex;
+        gap: 8px;
+    }
+
+    @media (max-width: 480px), (max-height: 860px) {
+        body {
+            align-items: stretch;
+            padding: 0;
+            background: var(--white);
+        }
+
+        .iphone {
+            width: 100%;
+            height: 100dvh;
+            max-height: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .notch {
+            display: none;
+        }
+
+        .app-header {
+            padding-top: 24px;
+        }
+
+        .screen {
+            padding: 24px 16px;
+        }
+
+        .modal {
+            width: 100%;
+            margin: 0;
+            border-radius: 20px 20px 0 0;
+            max-height: min(85dvh, 85vh);
+        }
+
+        .modal-overlay {
+            align-items: flex-end;
+            padding: 0;
+        }
+
+        .note-entry-row,
+        .modal-actions {
+            flex-direction: column;
+        }
+
+        .note-entry-row .primary-btn,
+        .modal-actions button {
+            width: 100%;
+        }
+    }
 
     /* Login logs */
     .log-item {
@@ -601,7 +746,7 @@
             <div id="taskList"></div>
             <div class="spacer"></div>
             <button class="secondary-btn" onclick="showTeam()" style="margin-bottom:8px;">Visa arbetsfördelning</button>
-            <button class="delete-btn" style="background:var(--red);" onclick="doLogout()">Logga ut</button>
+            <button class="delete-btn" onclick="doLogout()">Logga ut</button>
         </div>
 
         <!-- Task Detail -->
@@ -617,29 +762,29 @@
                 <p id="aiSuggestionText">Hämtar förslag...</p>
             </div>
 
-            <label style="font-size:14px; font-weight:600; color:var(--blue); margin-bottom:8px; display:block;">Tilldela / Omtilldela:</label>
+            <label class="section-label">Tilldela / Omtilldela:</label>
             <select class="assign-select" id="assignSelect">
                 <option value="">Välj medarbetare...</option>
             </select>
             <button class="primary-btn" onclick="assignOrReassign()">Tilldela uppdrag</button>
 
             <!-- Edit content -->
-            <div style="margin-top:16px;">
+            <div class="section-block">
                 <button class="edit-btn" onclick="showEditModal()">✏️ Redigera beskrivning & filer</button>
             </div>
 
             <!-- Notes -->
             <div class="notes-section">
-                <label style="font-size:14px; font-weight:600; color:var(--blue); margin-bottom:8px; display:block;">Anteckningar</label>
+                <label class="section-label">Anteckningar</label>
                 <div id="notesList"></div>
-                <div style="display:flex;gap:8px;">
+                <div class="note-entry-row">
                     <input class="note-input" id="noteInput" placeholder="Skriv en anteckning..." style="flex:1;margin-bottom:0;">
-                    <button class="primary-btn" onclick="addNote()" style="width:auto;padding:12px 20px;margin-bottom:0;">Spara</button>
+                    <button class="primary-btn" onclick="addNote()" style="padding:12px 20px;margin-bottom:0;">Spara</button>
                 </div>
             </div>
 
             <!-- Delete -->
-            <div style="margin-top:16px;">
+            <div class="section-block">
                 <button class="delete-btn" onclick="deleteTask()">🗑️ Ta bort uppdrag</button>
             </div>
         </div>
@@ -696,6 +841,10 @@
 </div>
 
 <script>
+    if (new URLSearchParams(window.location.search).get('embed') === '1') {
+        document.documentElement.classList.add('embed-mode');
+    }
+
     let currentUser = null;
     let currentTask = null;
     let editAttachments = [];
